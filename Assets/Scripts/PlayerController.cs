@@ -25,6 +25,9 @@ public class PlayerController : MonoBehaviour
     // 移動中フラグ
     private bool isMoving = false;
 
+    // 見た目の向き・重ね順を制御するコントローラー[cite: 1]
+    private PlayerSpriteController spriteController;
+
     // C# イベントで移動を通知（ゲームターン進行に使えます）
     public static event Action<Vector2Int> OnPlayerMoved;
 
@@ -35,6 +38,10 @@ public class PlayerController : MonoBehaviour
     {
         GridPosition = startGridPosition;
         SnapToGrid();
+
+        spriteController = GetComponent<PlayerSpriteController>();
+        // 初期のソート更新（GridPosition が既に設定されている前提）
+        if (spriteController != null) spriteController.UpdateSortingOrder(GridPosition.y);
     }
 
     private void Update()
@@ -50,6 +57,7 @@ public class PlayerController : MonoBehaviour
 
         if (dir != Vector2Int.zero)
         {
+            if (spriteController != null) spriteController.SetFacing(dir);
             TryMove(dir);
         }
     }
@@ -109,6 +117,7 @@ public class PlayerController : MonoBehaviour
         }
 
         GridPosition = targetGrid;
+        if (spriteController != null) spriteController.UpdateSortingOrder(GridPosition.y);
 
         // 移動後の処理：ターン進行通知、FOV 更新など
         OnPlayerMoved?.Invoke(GridPosition);
